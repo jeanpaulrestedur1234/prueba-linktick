@@ -1,13 +1,60 @@
 version: '3.8'
-services:
-  productos:
-    build: ./products
-    ports:
-      - "8081:8080"
-  inventario:
-    build: ./inventory
-    ports:
-      - "8082:8080"
-    depends_on:
-      - productos
 
+services:
+  postgres_inventory:
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_DB: db_inventory
+      POSTGRES_USER: root_prueba
+      POSTGRES_PASSWORD: Abcd1234
+    ports:
+      - "5433:5432"
+    volumes:
+      - inventory_data:/var/lib/postgresql/data
+      - ./apps/inventory/init:/docker-entrypoint-initdb.d
+
+  postgres_products:
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_DB: db_products
+      POSTGRES_USER: root_prueba
+      POSTGRES_PASSWORD: Abcd1234
+    ports:
+      - "5434:5432"
+    volumes:
+      - products_data:/var/lib/postgresql/data
+      - ./apps/products/init:/docker-entrypoint-initdb.d
+
+  inventory:
+    build:
+      context: ./apps/inventory
+    environment:
+      SPRING_APPLICATION_NAME: inventory
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_inventory:5432/db_inventory
+      SPRING_DATASOURCE_USERNAME: root_prueba
+      SPRING_DATASOURCE_PASSWORD: Abcd1234
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres_inventory
+
+  products:
+    build:
+      context: ./apps/products
+    environment:
+      SPRING_APPLICATION_NAME: products
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_products:5432/db_products
+      SPRING_DATASOURCE_USERNAME: root_prueba
+      SPRING_DATASOURCE_PASSWORD: Abcd1234
+      SERVER_PORT: 8081
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres_products
+
+volumes:
+  inventory_data:
+  products_data:

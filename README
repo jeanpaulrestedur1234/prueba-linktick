@@ -1,0 +1,56 @@
+# Proyecto Linktick
+
+Este proyecto contiene dos aplicaciones independientes (`inventory` y `products`), cada una con su propia base de datos PostgreSQL, todo orquestado mediante Docker Compose.
+
+---
+
+## Tecnologías usadas
+
+- Docker & Docker Compose  
+- PostgreSQL 14  
+- Spring Boot (Java)  
+- Volúmenes Docker para persistencia de datos  
+
+---
+
+## Estructura del proyecto
+
+
+/
+├── apps/
+│   ├── inventory/          # Código fuente y Dockerfile para la app Inventory
+│   └── products/           # Código fuente y Dockerfile para la app Products
+├── docker-compose.yml      # Configuración para levantar los servicios
+└── README.md               # Este archivo
+
+---
+
+## Requisitos
+
+- Docker  
+- Docker Compose  
+- Java (solo para desarrollo local si deseas correr las apps sin Docker)
+
+---
+
+## Cómo levantar el proyecto
+
+1. Clona el repositorio y ubícate en la carpeta raíz del proyecto.
+
+2. (Opcional) Configura las variables de entorno en un archivo `.env` con el siguiente contenido:
+
+```env
+INVENTORY_DB=db_inventory
+INVENTORY_DB_USER=root_prueba
+INVENTORY_DB_PASSWORD=Abcd1234
+
+PRODUCTS_DB=db_products
+PRODUCTS_DB_USER=root_prueba
+PRODUCTS_DB_PASSWORD=Abcd1234
+
+Levanta todos los servicios con Docker Compose:
+
+bash
+Copiar
+Editar
+docker-compose up --build
