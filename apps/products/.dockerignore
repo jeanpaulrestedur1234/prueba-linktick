@@ -1,0 +1,22 @@
+# Ignorar carpetas y archivos de sistema
+.git
+.gitignore
+.DS_Store
+.idea
+.vscode
+
+# Ignorar carpetas de build/compilación
+target/
+out/
+
+# Ignorar archivos y carpetas que no se deben incluir en la imagen
+*.log
+*.tmp
+*.bak
+
+# Ignorar configuraciones locales que no se deben subir
+application-local.properties
+*.iml
+
+# Ignorar carpetas de dependencias que no se copian al contenedor
+node_modules/

@@ -4,56 +4,70 @@ services:
   postgres_inventory:
     image: postgres:14
     restart: always
+    container_name: postgres_inventory
     environment:
-      POSTGRES_DB: db_inventory
-      POSTGRES_USER: root_prueba
-      POSTGRES_PASSWORD: Abcd1234
+      POSTGRES_DB: ${INVENTORY_DB} 
+      POSTGRES_USER: ${INVENTORY_DB_USER} 
+      POSTGRES_PASSWORD: ${INVENTORY_DB_PASSWORD} 
     ports:
-      - "5433:5432"
+      - "${INVENTORY_DB_PORT}:5432" 
     volumes:
       - inventory_data:/var/lib/postgresql/data
       - ./apps/inventory/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${INVENTORY_DB_USER} -d ${INVENTORY_DB}"]   
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   postgres_products:
     image: postgres:14
     restart: always
+    container_name: postgres_products
     environment:
-      POSTGRES_DB: db_products
-      POSTGRES_USER: root_prueba
-      POSTGRES_PASSWORD: Abcd1234
+      POSTGRES_DB: ${PRODUCTS_DB} 
+      POSTGRES_USER: ${PRODUCTS_DB_USER} 
+      POSTGRES_PASSWORD: ${PRODUCTS_DB_PASSWORD} 
     ports:
-      - "5434:5432"
+      - "${PRODUCTS_DB_PORT}:5432" 
     volumes:
       - products_data:/var/lib/postgresql/data
       - ./apps/products/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PRODUCTS_DB_USER} -d ${PRODUCTS_DB}"]   
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   inventory:
     build:
       context: ./apps/inventory
     environment:
       SPRING_APPLICATION_NAME: inventory
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_inventory:5432/db_inventory
-      SPRING_DATASOURCE_USERNAME: root_prueba
-      SPRING_DATASOURCE_PASSWORD: Abcd1234
-      SERVER_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_inventory:5432/${INVENTORY_DB}
+      SPRING_DATASOURCE_USERNAME: ${INVENTORY_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${INVENTORY_DB_PASSWORD}
+      SERVER_PORT: ${INVENTORY_PORT} 
     ports:
-      - "8080:8080"
+      - "${INVENTORY_PORT}:${INVENTORY_PORT}" 
     depends_on:
-      - postgres_inventory
+      postgres_inventory:
+        condition: service_healthy
 
   products:
     build:
       context: ./apps/products
     environment:
       SPRING_APPLICATION_NAME: products
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_products:5432/db_products
-      SPRING_DATASOURCE_USERNAME: root_prueba
-      SPRING_DATASOURCE_PASSWORD: Abcd1234
-      SERVER_PORT: 8081
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_products:5432/${PRODUCTS_DB}
+      SPRING_DATASOURCE_USERNAME: ${PRODUCTS_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${PRODUCTS_DB_PASSWORD}
+      SERVER_PORT: ${PRODUCTS_PORT} 
     ports:
-      - "8081:8081"
+      - "${PRODUCTS_PORT}:${PRODUCTS_PORT}" 
     depends_on:
-      - postgres_products
+      postgres_products:
+        condition: service_healthy
 
 volumes:
   inventory_data:
